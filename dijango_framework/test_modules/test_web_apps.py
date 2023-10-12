@@ -11,6 +11,12 @@ class TestBrowser(TestBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def setUp(self) -> None:
+        super().setUp()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+
     def test_001_open_browser(self):
         test_case_id = "WEB_BROWSER_TC_001"
 
