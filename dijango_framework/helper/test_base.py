@@ -9,6 +9,7 @@ from typing import Optional
 
 from django.test import LiveServerTestCase
 from appium import webdriver as appium_webdriver
+from appium import webdriver as desktop_webdriver
 from appium.webdriver.common.mobileby import MobileBy
 from selenium import webdriver as selenium_webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -45,6 +46,7 @@ class TestBase(LiveServerTestCase):
         self.browser = env('BROWSER')
         self.headless = env('HEADLESS')
         self.test_log_file = env('TEST_LOG_FILE')
+        self.desktop_app = env('DESKTOP_APP')
         self.current_platform = current_os
         self.root_dir = Path(__file__).resolve().parent.parent.parent
         self.drivers_dir = str(self.root_dir) + "\\drivers\\"
@@ -59,7 +61,7 @@ class TestBase(LiveServerTestCase):
             self.device_configurations()
 
         elif self.platform == "DESKTOP":
-            print("Platform Desktop is initializing")
+            self.desktop_configuration()
 
     def tearDown(self) -> None:
         print("Test Base Teardown")
@@ -126,10 +128,24 @@ class TestBase(LiveServerTestCase):
 
         self.driver = appium_webdriver.Remote(self.appium_server, desired_caps)
 
+    def desktop_configuration(self):
+        desired_caps = {
+            'platformName': 'Windows',
+            'deviceName': 'WindowsPC',
+            'app': self.desktop_app,
+            'platformVersion': '10',
+            'newCommandTimeout': 300  # Set the timeout (seconds) for new commands
+        }
+
+        self.driver = desktop_webdriver.Remote(
+            command_executor=self.appium_server,  # WinAppDriver server address
+            desired_capabilities=desired_caps
+        )
+        # self.driver.maximize_window()
 
     ############################################################################
-    # Generic Methods
-    # These methods are generic. It can be used by any module.
+    # Generic Methods for Web Browsers
+    # These methods are generic. It can be used by any module on web based
     ############################################################################
     def get(self, relative_url: str) -> None:
         self.driver.get(relative_url)
@@ -258,8 +274,8 @@ class TestBase(LiveServerTestCase):
             self.take_screen_shot(filename)
 
     ############################################################################
-    # Generic Methods for Android device
-    # These methods are generic. It can be used by any module.
+    # Generic Methods for Android devices
+    # These methods are generic. It can be used by any module on android device based
     ############################################################################
     def launch_activity(self, packageName, activity):
         # Launching the Android File Manager
@@ -270,3 +286,81 @@ class TestBase(LiveServerTestCase):
         # Closing the Android File Manager
         self.driver.terminate_app(packageName)
         self.waitForSeconds(1)
+
+    ############################################################################
+    # Generic Methods for Desktop applications
+    # These methods are generic. It can be used by any module on desktop devices
+    ############################################################################
+    def basic(self):
+        desired_caps = {}
+        self.driver = appium_webdriver.Remote(
+            command_executor=self.appium_server,  # WinAppDriver server address
+            desired_capabilities=desired_caps
+        )
+
+    def desktop_verify_element_present(self, selector: str, element: str):
+        if selector == "ID":
+            self.driver.find_element_by_accessibility_id(element).is_displayed()
+        elif selector == "NAME":
+            self.driver.find_element_by_name(element).is_displayed()
+        elif selector == "XPATH":
+            self.driver.find_element_by_xpath(element).is_displayed()
+
+    def desktop_click(self, selector: str, element: str):
+        if selector == "ID":
+            self.driver.find_element_by_accessibility_id(element).click()
+        elif selector == "NAME":
+            self.driver.find_element_by_name(element).click()
+        elif selector == "XPATH":
+            self.driver.find_element_by_xpath(element).click()
+
+        self.waitForSeconds(2)
+
+    def desktop_retrive_text(self, selector: str, element: str):
+        text = ""
+
+        if selector == "ID":
+            text = self.driver.find_element_by_accessibility_id(element).text
+        elif selector == "NAME":
+            text = self.driver.find_element_by_name(element).text
+        elif selector == "XPATH":
+            text = self.driver.find_element_by_xpath(element).text
+
+        return text
+
+    def desktop_type_text(self, selector: str, element: str, value: str):
+        if selector == "ID":
+            self.driver.find_element_by_accessibility_id(element).send_keys(value)
+        elif selector == "NAME":
+            self.driver.find_element_by_name(element).send_keys(value)
+        elif selector == "XPATH":
+            self.driver.find_element_by_xpath(element).send_keys(value)
+
+        self.waitForSeconds(2)
+
+    def desktop_clear_field(self, selector: str, element: str):
+        if selector == "ID":
+            self.driver.find_element_by_accessibility_id(element).clear()
+        elif selector == "NAME":
+            self.driver.find_element_by_name(element).clear()
+        elif selector == "XPATH":
+            self.driver.find_element_by_xpath(element).clear()
+
+        self.waitForSeconds(2)
+
+    def desktop_clear_and_type(self, selector: str, element: str, value: str):
+        if selector == "ID":
+            self.driver.find_element_by_accessibility_id(element).clear()
+            self.waitForSeconds(1)
+            self.driver.find_element_by_accessibility_id(element).send_keys(value)
+            self.waitForSeconds(1)
+        elif selector == "NAME":
+            self.driver.find_element_by_name(element).clear()
+            self.waitForSeconds(1)
+            self.driver.find_element_by_name(element).send_keys(value)
+            self.waitForSeconds(1)
+        elif selector == "XPATH":
+            self.driver.find_element_by_xpath(element).clear()
+            self.waitForSeconds(1)
+            self.driver.find_element_by_xpath(element).send_keys(value)
+            self.waitForSeconds(1)
