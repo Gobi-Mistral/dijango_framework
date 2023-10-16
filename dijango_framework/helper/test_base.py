@@ -174,6 +174,12 @@ class TestBase(LiveServerTestCase):
                 element.clear()
             element.send_keys(value)
 
+    def click_form(self, *data: tuple):
+        for selector, element in data:
+            element = self.driver.find_element(selector, element)
+            element.click()
+            self.waitForSeconds(0.1)
+
     def select_dropdown_by_index(self, *data: tuple):
         for element, index in self._loop_through_selector_data_pair(*data):
             self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')

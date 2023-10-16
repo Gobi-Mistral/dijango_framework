@@ -25,53 +25,53 @@ class TestDesktop(TestBase):
         try:
             self.waitForSeconds(5)
             # Find and interact with Calculator elements
-            self.click(By.NAME, "One")
-            self.click(By.NAME, "Plus")
-            self.click(By.NAME, "Two")
-            self.click(By.NAME, "Equals")
+            self.click_form((By.NAME, "One"),
+                            (By.NAME, "Plus"),
+                            (By.NAME, "Two"),
+                            (By.NAME, "Equals"))
 
             # Retrieve and print the result
             result = self.retrive_text(By.ACCESSIBILITY_ID, "CalculatorResults")
             print(f"Calculator Result: {result}")
 
-            self.click(By.NAME, "Seven")
-            self.click(By.NAME, "Multiply by")
-            self.click(By.NAME, "Nine")
-            self.click(By.NAME, "Plus")
-            self.click(By.NAME, "One")
-            self.click(By.NAME, "Equals")
-            self.click(By.NAME, "Divide by")
-            self.click(By.NAME, "Eight")
-            self.click(By.NAME, "Equals")
+            self.click_form((By.NAME, "Seven"),
+                            (By.NAME, "Multiply by"),
+                            (By.NAME, "Nine"),
+                            (By.NAME, "Plus"),
+                            (By.NAME, "One"),
+                            (By.NAME, "Equals"),
+                            (By.NAME, "Divide by"),
+                            (By.NAME, "Eight"),
+                            (By.NAME, "Equals"))
 
             # Retrieve and print the result
             result = self.retrive_text(By.ACCESSIBILITY_ID, "CalculatorResults")
             print(f"Calculator Result: {result}")
 
-            self.click(By.NAME, "Eight")
-            self.click(By.NAME, "Eight")
-            self.click(By.NAME, "Divide by")
-            self.click(By.NAME, "One")
-            self.click(By.NAME, "One")
-            self.click(By.NAME, "Equals")
+            self.click_form((By.NAME, "Eight"),
+                            (By.NAME, "Eight"),
+                            (By.NAME, "Divide by"),
+                            (By.NAME, "One"),
+                            (By.NAME, "One"),
+                            (By.NAME, "Equals"))
 
             # Retrieve and print the result
             result = self.retrive_text(By.ACCESSIBILITY_ID, "CalculatorResults")
             print(f"Calculator Result: {result}")
 
-            self.click(By.NAME, "Nine")
-            self.click(By.NAME, "Multiply by")
-            self.click(By.NAME, "Nine")
-            self.click(By.NAME, "Equals")
+            self.click_form((By.NAME, "Nine"),
+                            (By.NAME, "Multiply by"),
+                            (By.NAME, "Nine"),
+                            (By.NAME, "Equals"))
 
             # Retrieve and print the result
             result = self.retrive_text(By.ACCESSIBILITY_ID, "CalculatorResults")
             print(f"Calculator Result: {result}")
 
-            self.click(By.NAME, "Nine")
-            self.click(By.NAME, "Minus")
-            self.click(By.NAME, "One")
-            self.click(By.NAME, "Equals")
+            self.click_form((By.NAME, "Nine"),
+                            (By.NAME, "Minus"),
+                            (By.NAME, "One"),
+                            (By.NAME, "Equals"))
 
             # Retrieve and print the result
             result = self.retrive_text(By.ACCESSIBILITY_ID, "CalculatorResults")
@@ -227,15 +227,40 @@ class TestDesktop(TestBase):
             self.click_element(By.XPATH, "//*[@Name='OK']")
             self.verify_element_is_present(By.XPATH, "//*[@Name='Start']")
 
+            self.click_element(By.NAME, "Query Data")
+            self.waitForSeconds(2)
+            result = self.retrive_text(By.XPATH, "//*[@AutomationId='1014']")
+            print(f"Query Data App Version : {result}")
+            self.driver.find_element(By.NAME, "Fetch Query").click()
+            value = self.retrive_text(By.XPATH, "//*[@AutomationId='65535']")
+            print(f"Query Port Popup : {value}")
+            self.click_element(By.XPATH, "//*[@Name='OK']")
+            self.select_pharmacy_query_data("Liberty Software")
+            self.type_text(By.ACCESSIBILITY_ID, "1007", "RX124034567")
+            self.click(By.NAME, "Fetch Query")
+            self.waitForSeconds(2)
+            result = self.retrive_text(By.XPATH, "//*[@AutomationId='1012']")
+            print(f"Fetched Query Data Response : {result}")
+
+            self.click_element(By.NAME, "Response Data")
+            self.waitForSeconds(2)
+            self.select_pharmacy("None")
+
         except Exception as ex:
             print(f"Exception occurred: {ex}")
             self.log_test_result(f'{module_name}', f'{test_case_id}', "FAIL")
             self.assertTrue(False, f"*** ERROR: Test case {test_case_id} failed due to exception {ex} {traceback.format_exc()}")
 
+    
     ############################################################################
     # Generic Methods for Desktop specific apps
     ############################################################################
     def select_pharmacy(self, pharmacy_name):
         self.click(By.XPATH, "//*[@AutomationId='1016']")
+        self.click_element(By.XPATH, f"//*[@Name='{pharmacy_name}']")
+        self.waitForSeconds(3)
+
+    def select_pharmacy_query_data(self, pharmacy_name):
+        self.click(By.XPATH, "//*[@AutomationId='1006']")
         self.click_element(By.XPATH, f"//*[@Name='{pharmacy_name}']")
         self.waitForSeconds(3)
