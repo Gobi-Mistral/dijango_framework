@@ -1,5 +1,6 @@
 import traceback
 
+from appium.webdriver.common.touch_action import TouchAction
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 
@@ -191,23 +192,28 @@ class TestDesktop(TestBase):
 
             self.select_pharmacy("BestRx")
 
-            self.type_text(By.XPATH, "//*[@AutomationId='1007']", "RX123NDC43500")
-            self.type_text(By.XPATH, "//*[@AutomationId='1023']", "120")
-            self.type_text(By.XPATH, "//*[@AutomationId='1025']", "112")
-            self.type_text(By.XPATH, "//*[@AutomationId='1013']", "Jhon David")
-
-            self.type_text(By.XPATH, "//*[@AutomationId='1027']", "Next appointment on december 1st week")
-            self.type_text(By.XPATH, "//*[@AutomationId='1019']", "Dollo Tera 250 MG")
-            self.type_text(By.XPATH, "//*[@AutomationId='1021']", "Take 1 medicine on each for after food and don't drink hot water")
-            self.type_text(By.XPATH, "//*[@AutomationId='1033']", "23456798342")
-            self.type_text(By.XPATH, "//*[@AutomationId='1029']", "Dr.Miller")
-            self.type_text(By.XPATH, "//*[@AutomationId='1031']", "Texas Pharmacy")
-            self.type_text(By.XPATH, "//*[@AutomationId='1039']", "December 05 2023")
-            self.type_text(By.XPATH, "//*[@AutomationId='1036']", "October 12 2023")
-            self.type_text(By.XPATH, "//*[@AutomationId='1037']", "December 01 2023")
-            self.type_text(By.XPATH, "//*[@AutomationId='1053']", "If you have any concern about this medicine, please contact pharmacy")
+            self.fill_form((By.XPATH, "//*[@AutomationId='1007']", "RX123NDC43500"),
+                            (By.XPATH, "//*[@AutomationId='1023']", "120"),
+                            (By.XPATH, "//*[@AutomationId='1025']", "112"),
+                            (By.XPATH, "//*[@AutomationId='1013']", "Jhon David"),
+                            (By.XPATH, "//*[@AutomationId='1027']", "Next appointment on december 1st week"),
+                            (By.XPATH, "//*[@AutomationId='1019']", "Dollo Tera 250 MG"),
+                            (By.XPATH, "//*[@AutomationId='1021']", "Take 1 medicine on each for after food and don't drink hot water"),
+                            (By.XPATH, "//*[@AutomationId='1033']", "23456798342"),
+                            (By.XPATH, "//*[@AutomationId='1029']", "Dr.Miller"),
+                            (By.XPATH, "//*[@AutomationId='1031']", "Texas Pharmacy"),
+                            (By.XPATH, "//*[@AutomationId='1039']", "December 05 2023"),
+                            (By.XPATH, "//*[@AutomationId='1036']", "October 12 2023"),
+                            (By.XPATH, "//*[@AutomationId='1037']", "December 01 2023"),
+                            (By.XPATH, "//*[@AutomationId='1053']", "If you have any concern about this medicine, please contact pharmacy"))
 
             self.click(By.XPATH, "//*[@AutomationId='1046']")
+
+            self.fill_form((By.ACCESSIBILITY_ID, "1041", "Keep in refrigerator. Do not freeze."),
+                           (By.ACCESSIBILITY_ID, "1043", "Bring to room temperature before preparing for use."),
+                           (By.ACCESSIBILITY_ID, "1042", "If brought to room temperature, this product expires after."),
+                           (By.ACCESSIBILITY_ID, "1044", "Do not shake."),
+                           (By.ACCESSIBILITY_ID, "1045", "Protect from light."))
 
             self.click_element(By.XPATH, "//*[@Name='Submit']")
             value = self.retrive_text(By.XPATH, "//*[@AutomationId='1004']")
@@ -226,6 +232,9 @@ class TestDesktop(TestBase):
             self.log_test_result(f'{module_name}', f'{test_case_id}', "FAIL")
             self.assertTrue(False, f"*** ERROR: Test case {test_case_id} failed due to exception {ex} {traceback.format_exc()}")
 
+    ############################################################################
+    # Generic Methods for Desktop specific apps
+    ############################################################################
     def select_pharmacy(self, pharmacy_name):
         self.click(By.XPATH, "//*[@AutomationId='1016']")
         self.click_element(By.XPATH, f"//*[@Name='{pharmacy_name}']")

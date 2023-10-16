@@ -7,6 +7,7 @@ from pathlib import Path
 from telnetlib import EC
 from typing import Optional
 
+from appium.webdriver.common.touch_action import TouchAction
 from django.test import LiveServerTestCase
 from appium import webdriver as appium_webdriver
 from appium import webdriver as desktop_webdriver
@@ -157,10 +158,36 @@ class TestBase(LiveServerTestCase):
         except Exception as ex:
             self.driver.execute_script("arguments[0].click();", element)
 
+    def _loop_through_selector_data_pair(self, *data: tuple):
+        for by, selector, value in data:
+            element = self.find(by, selector)
+            yield element, value
+
     def find(self, by: str, selector: str) -> Optional[WebElement]:
         element = self.driver.find_element(by, selector)
         self.assertTrue(element, 'Element cannot be found: "%s"' % selector)
         return element
+
+    def fill_form(self, *data: tuple, clear_input=True):
+        for element, value in self._loop_through_selector_data_pair(*data):
+            if clear_input:
+                element.clear()
+            element.send_keys(value)
+
+    def select_dropdown_by_index(self, *data: tuple):
+        for element, index in self._loop_through_selector_data_pair(*data):
+            self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
+            Select(element).select_by_index(index)
+
+    def select_dropdown_by_value(self, *data: tuple):
+        for element, value in self._loop_through_selector_data_pair(*data):
+            self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
+            Select(element).select_by_value(value)
+
+    def select_dropdown_by_visible_text(self, *data: tuple):
+        for element, text in self._loop_through_selector_data_pair(*data):
+            self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
+            Select(element).select_by_visible_text(text)
 
     def click_element(self, by: str, element: str):
         self.driver.find_element(by, element).click()
@@ -210,6 +237,23 @@ class TestBase(LiveServerTestCase):
                     self.assertTrue(False, f"*** ERROR: Element {text} is not visible after waiting for {scroll_count} time")
                     break
 
+    def move_to_element_by_id(self, id):
+        element_visible = False
+        max_scroll_count = 10
+        scroll_count = 0
+        while (not element_visible):
+            try:
+                self.driver.find_element_by_android_uiautomator( f"new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().resourceIdMatches(\"{id}\"));")
+                self.waitForSeconds(2)
+                # print("*** INFO: Element found...")
+                element_visible = True
+            except:
+                self.waitForSeconds(1)
+                scroll_count += 1
+                if scroll_count == max_scroll_count:
+                    self.assertTrue(False, f"*** ERROR: Element is not visible after waiting for {scroll_count} time")
+                    break
+
     def verify_element_not_present(self, by: str, selector: str):
         variables = None
         try:
@@ -229,6 +273,22 @@ class TestBase(LiveServerTestCase):
             try:
                 elements = WebDriverWait(self.driver, 1).until(
                     EC.visibility_of_element_located((by, element)))
+                element_visible = True
+            except:
+                self.waitForSeconds(1)
+                elapsed_time += 1
+                if elapsed_time == timeout:
+                    self.assertTrue(False, f"*** ERROR: Element is not visible after waiting for {elapsed_time} seconds")
+                    break
+
+    def wait_until_not_visible(self, by: str, element: str, timeout: int = 30):
+        element_visible = False
+        elapsed_time = 0
+        while (not element_visible):
+            try:
+                elements = WebDriverWait(self.driver, 1).until(
+                    EC.invisibility_of_element((by, element)))
+                # print("*** INFO: Element found...")
                 element_visible = True
             except:
                 self.waitForSeconds(1)
@@ -273,6 +333,66 @@ class TestBase(LiveServerTestCase):
             filename = name.replace(" ", "_")
             self.take_screen_shot(filename)
 
+    def scrollDown(self):
+        handle_one_size = self.driver.get_window_size()
+        scroll_start = handle_one_size['height'] * 0.5
+        scroll_end = handle_one_size['height'] * 0.2
+
+        action = TouchAction(self.driver)
+        for i in range(10):
+            action.press(x=0, y=scroll_start).move_to(x=0, y=scroll_end).release().perform()
+            self.waitForSeconds(1)
+
+    def scroll_down_until_visible(self, by: str, element: str):
+        element_visible = False
+        max_scroll_count = 100
+        scroll_count = 0
+
+        handle_one_size = self.driver.get_window_size()
+        scroll_x = handle_one_size['width'] * 0.5
+        scroll_start = handle_one_size['height'] * 0.5
+        scroll_end = handle_one_size['height'] * 0.2
+
+        action = TouchAction(self.driver)
+
+        while (not element_visible):
+            try:
+                self.driver.find_element(by, element)
+                # print("*** INFO: Element found...")
+                element_visible = True
+            except:
+                action.press(x=scroll_x, y=scroll_start).move_to(x=scroll_x, y=scroll_end).release().perform()
+                self.waitForSeconds(1)
+                scroll_count += 1
+                if scroll_count == max_scroll_count:
+                    self.assertTrue(False, f"*** ERROR: Element is not visible after scrolling for {scroll_count} time")
+                    break
+
+    def scroll_up_until_visible(self, by: str, element: str):
+        element_visible = False
+        max_scroll_count = 100
+        scroll_count = 0
+
+        handle_one_size = self.driver.get_window_size()
+        scroll_x = handle_one_size['width'] * 0.5
+        scroll_start = handle_one_size['height'] * 0.2
+        scroll_end = handle_one_size['height'] * 0.5
+
+        action = TouchAction(self.driver)
+
+        while (not element_visible):
+            try:
+                self.driver.find_element(by, element)
+                # print("*** INFO: Element found...")
+                element_visible = True
+            except:
+                action.press(x=scroll_x, y=scroll_start).move_to(x=scroll_x, y=scroll_end).release().perform()
+                self.waitForSeconds(1)
+                scroll_count += 1
+                if scroll_count == max_scroll_count:
+                    self.assertTrue(False, f"*** ERROR: Element is not visible after scrolling for {scroll_count} time")
+                    break
+
     ############################################################################
     # Generic Methods for Android devices
     # These methods are generic. It can be used by any module on android device based
@@ -297,70 +417,3 @@ class TestBase(LiveServerTestCase):
             command_executor=self.appium_server,  # WinAppDriver server address
             desired_capabilities=desired_caps
         )
-
-    def desktop_verify_element_present(self, selector: str, element: str):
-        if selector == "ID":
-            self.driver.find_element_by_accessibility_id(element).is_displayed()
-        elif selector == "NAME":
-            self.driver.find_element_by_name(element).is_displayed()
-        elif selector == "XPATH":
-            self.driver.find_element_by_xpath(element).is_displayed()
-
-    def desktop_click(self, selector: str, element: str):
-        if selector == "ID":
-            self.driver.find_element_by_accessibility_id(element).click()
-        elif selector == "NAME":
-            self.driver.find_element_by_name(element).click()
-        elif selector == "XPATH":
-            self.driver.find_element_by_xpath(element).click()
-
-        self.waitForSeconds(2)
-
-    def desktop_retrive_text(self, selector: str, element: str):
-        text = ""
-
-        if selector == "ID":
-            text = self.driver.find_element_by_accessibility_id(element).text
-        elif selector == "NAME":
-            text = self.driver.find_element_by_name(element).text
-        elif selector == "XPATH":
-            text = self.driver.find_element_by_xpath(element).text
-
-        return text
-
-    def desktop_type_text(self, selector: str, element: str, value: str):
-        if selector == "ID":
-            self.driver.find_element_by_accessibility_id(element).send_keys(value)
-        elif selector == "NAME":
-            self.driver.find_element_by_name(element).send_keys(value)
-        elif selector == "XPATH":
-            self.driver.find_element_by_xpath(element).send_keys(value)
-
-        self.waitForSeconds(2)
-
-    def desktop_clear_field(self, selector: str, element: str):
-        if selector == "ID":
-            self.driver.find_element_by_accessibility_id(element).clear()
-        elif selector == "NAME":
-            self.driver.find_element_by_name(element).clear()
-        elif selector == "XPATH":
-            self.driver.find_element_by_xpath(element).clear()
-
-        self.waitForSeconds(2)
-
-    def desktop_clear_and_type(self, selector: str, element: str, value: str):
-        if selector == "ID":
-            self.driver.find_element_by_accessibility_id(element).clear()
-            self.waitForSeconds(1)
-            self.driver.find_element_by_accessibility_id(element).send_keys(value)
-            self.waitForSeconds(1)
-        elif selector == "NAME":
-            self.driver.find_element_by_name(element).clear()
-            self.waitForSeconds(1)
-            self.driver.find_element_by_name(element).send_keys(value)
-            self.waitForSeconds(1)
-        elif selector == "XPATH":
-            self.driver.find_element_by_xpath(element).clear()
-            self.waitForSeconds(1)
-            self.driver.find_element_by_xpath(element).send_keys(value)
-            self.waitForSeconds(1)
