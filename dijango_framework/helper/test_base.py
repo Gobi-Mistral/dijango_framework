@@ -173,6 +173,7 @@ class TestBase(LiveServerTestCase):
             if clear_input:
                 element.clear()
             element.send_keys(value)
+            self.waitForSeconds(0.1)
 
     def click_form(self, *data: tuple):
         for selector, element in data:

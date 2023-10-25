@@ -251,7 +251,119 @@ class TestDesktop(TestBase):
             self.log_test_result(f'{module_name}', f'{test_case_id}', "FAIL")
             self.assertTrue(False, f"*** ERROR: Test case {test_case_id} failed due to exception {ex} {traceback.format_exc()}")
 
-    
+    def test_004_desktop_groove_music_app(self):
+        test_case_id = "DESKTOP_APP_TC_004"
+
+        try:
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "NavMenuButton")
+            self.driver.find_element(By.ACCESSIBILITY_ID, "NavMenuButton").click()
+            self.waitForSeconds(2)
+
+            self.wait_until_visible(By.NAME, "Playlists")
+            self.driver.find_element(By.NAME, "Playlists").click()
+            self.waitForSeconds(2)
+
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "PlaylistsPage")
+            txt = self.retrive_text(By.ACCESSIBILITY_ID, "FilteredEmptyPageTitle")
+            print("PlayList Page Details -:- ", txt)
+            self.waitForSeconds(2)
+
+            self.click_element(By.ACCESSIBILITY_ID, "Command_CreatePlaylistCommand")
+            self.waitForSeconds(2)
+
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "CreatePlaylist")
+            name = "MY_PLAY_LIST"
+            self.type_text(By.ACCESSIBILITY_ID, "PlaylistName", name)
+            txt = self.retrive_text(By.ACCESSIBILITY_ID, "Attribution")
+            print("Who is Created -:- ", txt)
+            self.click_element(By.ACCESSIBILITY_ID, "CreatePlaylist")
+            self.waitForSeconds(2)
+            self.wait_until_visible(By.XPATH, f"//*[contains(@Name,'Basic info for')]")
+            self.verify_element_is_present(By.XPATH, f"//*[contains(@Name,'Basic info for {name}')]")
+
+            self.click_element(By.ACCESSIBILITY_ID, "NavigateBackButton")
+            self.waitForSeconds(2)
+
+            self.click_element(By.XPATH, f"//*[contains(@Name,'{name}')]")
+            self.wait_until_visible(By.XPATH, f"//*[contains(@Name,'Basic info for')]")
+            txt = self.retrive_text(By.XPATH, f"//*[contains(@Name,'Basic info for')]")
+            print("Created PlayList Page Name -:- ", txt)
+            self.verify_element_is_present(By.XPATH, f"//*[contains(@Name,'Basic info for {name}')]")
+
+            self.waitForSeconds(6)
+
+            self.click_element(By.NAME, "Add songs from my collection, Go to Albums")
+            self.wait_until_visible(By.XPATH, f"//*[@Name='Songs']")
+            self.click_element(By.XPATH, f"//*[@Name='Songs']")
+            self.waitForSeconds(2)
+
+            # self.click_element(By.XPATH, "//*[@Name='Not finding everything?, Show us where to look for music,']")
+            # self.waitForSeconds(2)
+            # self.wait_until_visible(By.NAME, "Build your collection from your local music files")
+            # txt = self.retrive_text(By.NAME, "Build your collection from your local music files")
+            # print("Add songs into the Playlist Popup -:- ", txt)
+            # self.click_element(By.XPATH, f"//*[@Name='Add folder']")
+            # self.waitForSeconds(2)
+            #
+            # self.click_element(By.XPATH, f"//*[@Name='Music']")
+            # self.waitForSeconds(2)
+            # self.click_element(By.XPATH, f"//*[@Name='Add this folder to Music']")
+            # self.waitForSeconds(2)
+            # self.click_element(By.XPATH, f"//*[@Name='Done']")
+            # self.waitForSeconds(2)
+
+            self.click_element(By.XPATH, f"//*[@Name='mp3_8000']")
+            self.waitForSeconds(2)
+            self.click_element(By.XPATH, f"//*[@Name='Play all']")
+            self.waitForSeconds(6)
+            self.click_element(By.XPATH, f"//*[@Name='Pause']")
+            self.waitForSeconds(2)
+
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "NavMenuButton")
+            self.driver.find_element(By.ACCESSIBILITY_ID, "NavMenuButton").click()
+            self.waitForSeconds(2)
+            self.wait_until_visible(By.NAME, "Playlists")
+            self.driver.find_element(By.NAME, "Playlists").click()
+            self.waitForSeconds(2)
+
+            self.click_element(By.XPATH, f"//*[contains(@Name,'{name}')]")
+            self.wait_until_visible(By.XPATH, f"//*[contains(@Name,'Basic info for')]")
+
+            self.click_element(By.ACCESSIBILITY_ID, "Command_MoreCommand")
+            self.waitForSeconds(1)
+            self.click_element(By.NAME, "Delete")
+
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "MessageTextBox")
+            txt = self.retrive_text(By.ACCESSIBILITY_ID, "MessageTextBox")
+            print("PlayList Page Delete Details -:- ", txt)
+            self.waitForSeconds(2)
+
+            self.click_element(By.NAME, "OK")
+            self.waitForSeconds(2)
+
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "PlaylistsPage")
+            txt = self.retrive_text(By.ACCESSIBILITY_ID, "FilteredEmptyPageTitle")
+            self.verify_element_is_present(By.NAME, "Nothing to show here. Try a different filter.")
+            print("PlayList Page Details -:- ", txt)
+            self.waitForSeconds(2)
+
+        except Exception as ex:
+            print(f"Exception occurred: {ex}")
+            self.log_test_result(f'{module_name}', f'{test_case_id}', "FAIL")
+            self.assertTrue(False, f"*** ERROR: Test case {test_case_id} failed due to exception {ex} {traceback.format_exc()}")
+
+    def test_005_desktop_app(self):
+        test_case_id = "DESKTOP_APP_TC_005"
+
+        try:
+            self.wait_until_visible(By.ACCESSIBILITY_ID, "NavMenuButton")
+
+
+        except Exception as ex:
+            print(f"Exception occurred: {ex}")
+            self.log_test_result(f'{module_name}', f'{test_case_id}', "FAIL")
+            self.assertTrue(False, f"*** ERROR: Test case {test_case_id} failed due to exception {ex} {traceback.format_exc()}")
+
     ############################################################################
     # Generic Methods for Desktop specific apps
     ############################################################################

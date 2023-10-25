@@ -93,6 +93,6 @@ EXIT /B 0
 	
 :Desktop_Apps_Test
 	echo Android Test - Testing Desktop Apps
-	CALL :run_test dijango_framework.test_modules.test_desktop_app.TestDesktop.test_002_activation_key_generator
+	CALL :run_test dijango_framework.test_modules.test_desktop_app.TestDesktop.test_003_interface_test_server
 	CALL :backup_report Desktop_Apps
 	EXIT /B %ERRORLEVEL%
