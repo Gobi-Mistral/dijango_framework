@@ -40,9 +40,9 @@ class TestBase(LiveServerTestCase):
         self.device_app_activity = env('DEVICE_APP_ACTIVITY')
         self.device_browser_name = env('DEVICE_BROWSER_NAME')
         self.appium_server = env('APPIUM_SERVER')
-        self.asus_router_url = env('ASUS_ROUTER_URL')
-        self.asus_username= env('ASUS_USERNAME')
-        self.asus_password = env('ASUS_PASSWORD')
+        self.web_url = env('WEB_URL')
+        self.username= env('USERNAME')
+        self.password = env('PASSWORD')
         self.wait_timeout = env('WAIT_TIMEOUT')
         self.browser = env('BROWSER')
         self.headless = env('HEADLESS')
@@ -399,6 +399,9 @@ class TestBase(LiveServerTestCase):
                 if scroll_count == max_scroll_count:
                     self.assertTrue(False, f"*** ERROR: Element is not visible after scrolling for {scroll_count} time")
                     break
+
+    def scroll_down_web_page(self):
+        self.driver.execute_script("window.scrollTo(0, 150)")
 
     ############################################################################
     # Generic Methods for Android devices

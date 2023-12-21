@@ -21,26 +21,43 @@ class TestBrowser(TestBase):
         test_case_id = "WEB_BROWSER_TC_001"
 
         try:
-            self.driver.get(self.asus_router_url)
+            self.driver.get(self.web_url)
             self.waitForSeconds(3)
 
-            self.get(self.asus_router_url)
-            self.wait_until_visible(By.XPATH, "//div[@onclick='login();']")
+            self.get(self.web_url)
+            self.wait_until_visible(By.ID, "email")
 
-            self.type_text(By.XPATH, "//input[@id='login_username']", self.asus_username)
-            self.type_text(By.XPATH, "//input[@name='login_passwd']", self.asus_username)
-            self.clear_and_type_text(By.XPATH, "//input[@name='login_passwd']", self.asus_password)
-            self.click(By.XPATH, "//div[@onclick='login();']")
-            self.wait_until_visible(By.XPATH, "//span[text()='RT-AX3000']")
-
+            self.click(By.ID, "enterimg")
             self.waitForSeconds(2)
-            # Logout
-            text = self.retrive_text(By.XPATH, "//span[text()='Logout']")
-            print("Retrived Text ", text)
-            self.wait_until_visible(By.XPATH, "//span[text()='Logout']")
-            self.click(By.XPATH, "//span[text()='Logout']")
-            self._alert_accept()
-            self.waitForSeconds(1)
+            self.wait_until_visible(By.XPATH, "//h1[contains(text(),'Automation Demo Site')]")
+            self.click(By.XPATH, "//a[@href='Register.html']")
+            self.waitForSeconds(2)
+            self.wait_until_visible(By.XPATH, "//h2[contains(text(),'Register')]")
+            self.type_text(By.XPATH, "//input[@placeholder='First Name']", "Demo First")
+            self.type_text(By.XPATH, "//input[@placeholder='Last Name']", "Demo Second")
+            self.type_text(By.XPATH, "//textarea[@ng-model='Adress']", "Demo Automation Site")
+            self.type_text(By.XPATH, "//input[@ng-model='EmailAdress']", "demoSample@gmail.com")
+            self.type_text(By.XPATH, "//input[@ng-model='Phone']", "2323456898")
+            self.click(By.XPATH, "//input[@value='Male']")
+            self.click(By.XPATH, "//input[@value='Cricket']")
+            self.click(By.XPATH, "//input[@value='Movies']")
+            self.click(By.XPATH, "//input[@value='Hockey']")
+            self.scroll_down_web_page()
+            self.waitForSeconds(3)
+            self.select_dropdown_by_visible_text((By.ID, "Skills", "Android"),
+                                                 (By.ID, "countries", "Select Country"),
+                                                 (By.ID, "country", "India"))
+            self.scroll_down_web_page()
+            self.waitForSeconds(3)
+            self.select_dropdown_by_visible_text((By.ID, "yearbox", "1991"),
+                                                 (By.XPATH, "//select[@placeholder='Month']", "July"),
+                                                 (By.ID, "daybox", "21"))
+            self.scroll_down_web_page()
+            self.waitForSeconds(3)
+            self.type_text(By.ID, "firstpassword", self.password)
+            self.type_text(By.ID, "secondpassword", self.password)
+            self.click(By.ID, "submitbtn")
+            self.waitForSeconds(3)
 
         except Exception as ex:
             print(f"Exception occurred: {ex}")

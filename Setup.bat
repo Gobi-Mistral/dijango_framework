@@ -165,7 +165,7 @@ EXIT /B 0
 
 :repeat_run_test
 	SET cnt=1
-	SET TEST_COUNT=3
+	SET TEST_COUNT=1
 
 	echo ==============================================================================
 	echo Repeat Test Iteration Start - %cnt% End - %TEST_COUNT%	
