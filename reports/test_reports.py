@@ -2,6 +2,8 @@ import smtplib
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
+
+import openpyxl
 import pandas as pd
 import os
 from pathlib import Path
@@ -15,6 +17,9 @@ from pathlib import Path
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+
+from openpyxl import Workbook
+from openpyxl.chart import PieChart, BarChart, Reference
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent
 print(f"Project directory: {ROOT_DIR}")
@@ -272,6 +277,21 @@ def pie_and_bar_chart(test_sum):
     # plt.show()
     plt.savefig('bar_chart_1.png')
 
+def insert_pie_bar_chart_in_excel_report():
+    wb = Workbook()
+    ws = wb.active
+
+    # Insert pie chart
+    img_pie = openpyxl.drawing.image.Image('pie_chart_1.png')
+    ws.add_image(img_pie, 'A5')  # Adjust the cell where you want to place the chart
+
+    # Insert bar chart
+    img_bar = openpyxl.drawing.image.Image('bar_chart_1.png')
+    ws.add_image(img_bar, 'A5')  # Adjust the cell where you want to place the chart
+
+    # Save the Excel file
+    wb.save('Test_Report_1.xlsx')
+
 
 if __name__ == "__main__":
     # Assuming your JUnit XML file is 'junit_report.xml'
@@ -295,3 +315,5 @@ if __name__ == "__main__":
     print("Test : ",test_sum)
 
     pie_and_bar_chart(test_sum)
+
+    insert_pie_bar_chart_in_excel_report()
