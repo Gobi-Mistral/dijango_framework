@@ -14,6 +14,7 @@ from appium import webdriver as desktop_webdriver
 from appium.webdriver.common.mobileby import MobileBy
 from selenium import webdriver as selenium_webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -402,6 +403,79 @@ class TestBase(LiveServerTestCase):
 
     def scroll_down_web_page(self):
         self.driver.execute_script("window.scrollTo(0, 150)")
+
+    def highlight_the_element(self, element: str):
+        highlight_script = "var element = arguments[0]; element.style.border = '2px solid red'; element.style.backgroundColor = 'yellow';"
+        self.driver.execute_script(highlight_script, element)
+
+    def reset_the_highlighted_element(self, element: str):
+        reset_highlight_script = "var element = arguments[0]; element.style.border = ''; element.style.backgroundColor = '';"
+        self.driver.execute_script(reset_highlight_script, element)
+
+    def alert_accept(self):
+        alert = self.driver.switch_to.alert
+        alert.accept()  # Accept the alert
+        self.waitForSeconds(2)
+
+    def alert_dismiss(self):
+        alert = self.driver.switch_to.alert
+        alert.dismiss() # Dismiss the alert
+        self.waitForSeconds(2)
+
+    def navigate_back(self):
+        self.driver.back() # Perform a back navigation
+        self.waitForSeconds(2)
+
+    def navigate_forward(self):
+        self.driver.forward() # Perform a forward navigation
+        self.waitForSeconds(2)
+
+    def page_refresh(self):
+        self.driver.refresh() # Refresh the page
+        self.waitForSeconds(2)
+
+    def execute_java_scripts(self, scripts: str):
+        # Execute JavaScript code
+        self.driver.execute_script(scripts)
+
+    def delete_all_cookies(self):
+        self.driver.delete_all_cookies()
+
+    def maximize_window(self):
+        self.driver.maximize_window() # maximize window position
+
+    def minimize_window(self):
+        self.driver.minimize_window() # minimize window position
+
+    def set_page_load_timeout(self, seconds_To_wait: int):
+        self.driver.set_page_load_timeout(seconds_To_wait)
+
+    def retrieve_current_url(self):
+        url = self.driver.current_url
+        print("Page Current Url -:- ", url)
+        return url
+
+    def click_and_hold(self, element: str):
+        action = ActionChains(self.driver)
+        action.click_and_hold(on_element=element)
+        action.perform()
+
+    def double_click(self, element: str):
+        action = ActionChains(self.driver)
+        action.double_click(on_element=element)
+        action.perform()
+
+    def drag_and_drop(self, source_element: str, target_element: str):
+        action = ActionChains(self.driver)
+        action.drag_and_drop(source_element, target_element)
+        action.perform()
+
+    def move_to_element(self, element: str):
+        action = ActionChains(self.driver)
+        action.move_to_element(element)
+        action.perform()
+
+
 
     ############################################################################
     # Generic Methods for Android devices
