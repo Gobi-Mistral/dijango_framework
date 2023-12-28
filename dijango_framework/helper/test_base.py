@@ -1,7 +1,9 @@
+import csv
 import time
 from datetime import datetime
 import logging
 import platform
+import openpyxl
 import os
 from pathlib import Path
 from telnetlib import EC
@@ -305,16 +307,80 @@ class TestBase(LiveServerTestCase):
                     self.assertTrue(False, f"*** ERROR: Element is not visible after waiting for {elapsed_time} seconds")
                     break
 
-    def _alert_accept(self):
+    def wait_until_presence(self, by: str, element: str, timeout: int = 30):
+        element_visible = False
+        elapsed_time = 0
+        while (not element_visible):
+            try:
+                elements = WebDriverWait(self.driver, 1).until(
+                    EC.presence_of_element_located((by, element)))
+                element_visible = True
+            except:
+                self.waitForSeconds(1)
+                elapsed_time += 1
+                if elapsed_time == timeout:
+                    self.assertTrue(False, f"*** ERROR: Element is not present after waiting for {elapsed_time} seconds")
+                    break
+
+    def wait_until_element_to_be_selected(self, by: str, element: str, timeout: int = 30):
+        element_visible = False
+        elapsed_time = 0
+        while (not element_visible):
+            try:
+                elements = WebDriverWait(self.driver, 1).until(
+                    EC.element_located_to_be_selected((by, element)))
+                element_visible = True
+            except:
+                self.waitForSeconds(1)
+                elapsed_time += 1
+                if elapsed_time == timeout:
+                    self.assertTrue(False, f"*** ERROR: Element is not selected after waiting for {elapsed_time} seconds")
+                    break
+
+    def wait_until_element_to_be_clickable(self, by: str, element: str, timeout: int = 30):
+        element_visible = False
+        elapsed_time = 0
+        while (not element_visible):
+            try:
+                elements = WebDriverWait(self.driver, 1).until(
+                    EC.element_to_be_clickable((by, element)))
+                element_visible = True
+            except:
+                self.waitForSeconds(1)
+                elapsed_time += 1
+                if elapsed_time == timeout:
+                    self.assertTrue(False, f"*** ERROR: Element is not clickable after waiting for {elapsed_time} seconds")
+                    break
+
+    def alert_accept(self):
+        alert_msg = None
         try:
             self.waitForSeconds(1)
             WebDriverWait(self.driver, 30).until(EC.alert_is_present(), 'Timed out waiting for a popup to be appear.')
             alert = self.driver.switch_to.alert
+            alert_msg = alert.text
             alert.accept()
-            print("Alert is Present -:- ")
+            print("Alert is Present -:- ", alert_msg)
         except:
             pass
             print("Alert is Not Present")
+
+        self.waitForSeconds(1)
+
+    def alert_dismiss(self):
+        alert_msg = None
+        try:
+            self.waitForSeconds(1)
+            WebDriverWait(self.driver, 30).until(EC.alert_is_present(), 'Timed out waiting for a popup to be appear.')
+            alert = self.driver.switch_to.alert
+            alert_msg = alert.text
+            alert.dismiss()
+            print("Alert is Present -:- ", alert_msg)
+        except:
+            pass
+            print("Alert is Not Present")
+
+        self.waitForSeconds(1)
 
     def take_screen_shot(self, file_name, dir="screenshot_failures"):
         now = datetime.now()
@@ -412,16 +478,6 @@ class TestBase(LiveServerTestCase):
         reset_highlight_script = "var element = arguments[0]; element.style.border = ''; element.style.backgroundColor = '';"
         self.driver.execute_script(reset_highlight_script, element)
 
-    def alert_accept(self):
-        alert = self.driver.switch_to.alert
-        alert.accept()  # Accept the alert
-        self.waitForSeconds(2)
-
-    def alert_dismiss(self):
-        alert = self.driver.switch_to.alert
-        alert.dismiss() # Dismiss the alert
-        self.waitForSeconds(2)
-
     def navigate_back(self):
         self.driver.back() # Perform a back navigation
         self.waitForSeconds(2)
@@ -447,6 +503,12 @@ class TestBase(LiveServerTestCase):
     def minimize_window(self):
         self.driver.minimize_window() # minimize window position
 
+    def fullscreen_window(self):
+        self.driver.fullscreen_window() # Full Screen window
+
+    def set_window_size(self, size_x, size_y):
+        self.driver.set_window_size(size_x, size_y)
+
     def set_page_load_timeout(self, seconds_To_wait: int):
         self.driver.set_page_load_timeout(seconds_To_wait)
 
@@ -457,25 +519,124 @@ class TestBase(LiveServerTestCase):
 
     def click_and_hold(self, element: str):
         action = ActionChains(self.driver)
-        action.click_and_hold(on_element=element)
-        action.perform()
+        action.click_and_hold(on_element=element).perform()
 
     def double_click(self, element: str):
         action = ActionChains(self.driver)
-        action.double_click(on_element=element)
-        action.perform()
+        action.double_click(on_element=element).perform()
 
     def drag_and_drop(self, source_element: str, target_element: str):
         action = ActionChains(self.driver)
-        action.drag_and_drop(source_element, target_element)
-        action.perform()
+        action.drag_and_drop(source_element, target_element).perform()
 
     def move_to_element(self, element: str):
         action = ActionChains(self.driver)
-        action.move_to_element(element)
-        action.perform()
+        action.move_to_element(element).perform()
 
+    def open_new_tab(self, url: str):
+        self.driver.execute_script(f"window.open('{url}')")
 
+    def clear_input_field(self, by: str, element: str):
+        self.driver.find_element(by, element).clear()
+
+    def get_page_source(self):
+        page_source = self.driver.page_source
+        return page_source
+
+    def implicitly_wait(self, seconds: int):
+        self.driver.implicitly_wait(seconds) # in seconds
+
+    def get_attribute(self, by: str, element: str, value: str):
+        element = self.driver.find_element(by, element)
+        get_values = element.get_attribute(value)
+        return get_values
+
+    def switch_to_new_window(self):
+        current_window_handle = self.driver.current_window_handle
+
+        for handle in self.driver.window_handles: # Handling multiple windows and activate recent window
+            if handle != current_window_handle:
+                self.driver.switch_to.window(handle)
+                break
+
+    def switch_to_frame(self, by: str, element: str):
+        element = self.driver.find_element(by, element)
+        self.driver.switch_to.frame(element)
+
+    def switch_to_default_content(self):
+        self.driver.switch_to.default_content()
+
+    def verify_element_is_selected(self, by: str, element: str):
+        status = None
+        find_element = self.driver.find_element(by, element)
+        if find_element.is_selected():
+            status = True
+            print("Element is selected")
+        else:
+            status = False
+            print("Element is not selected")
+
+        return status
+
+    def verify_element_is_enabled(self, by: str, element: str):
+        status = None
+        find_element = self.driver.find_element(by, element)
+        if find_element.is_enabled():
+            status = True
+            print("Element is enabled")
+        else:
+            status = False
+            print("Element is not enabled")
+
+        return status
+
+    def submit(self,by:str, element:str):
+        find_element = self.driver.find_element(by, element)
+        find_element.submit()
+
+    def close_tab(self):
+        self.driver.close()
+
+    def jsClick(self, by:str, element: str):
+        find_element = self.driver.find_element(by, element)
+        self.driver.execute_script("arguments[0].click();", find_element) # Use JavaScript to perform the click
+
+    def get_title(self):
+        actual_title = self.driver.title
+        return actual_title
+
+    ############################################################################
+    # Python Generic Methods
+    ############################################################################
+    def read_text_file(self, file_name):
+        file_name = "D:/work-space/digi-development/dijango_framework/requirements.txt"
+
+        with open(file_name, "r") as file:
+            # data = file.read()
+            for line in file:
+                print("Read Text File Line By Line -:- ", line.strip())
+
+    def read_csv_file(self, file_name):
+        file_name = "D:/work-space/digi-development/dijango_framework/test_log.csv"
+
+        with open(file_name, "r") as csvfile:
+            csv_reader = csv.reader(csvfile)
+
+            for row in csv_reader:
+                print("Read CSV File Row By Row -:- ", row)
+
+    def read_excel_file(self, file_name):
+        file_name = "D:/work-space/digi-development/dijango_framework/Test_Report.xlsx"
+
+        workbook = openpyxl.load_workbook(file_name)
+        worksheet = workbook.active
+
+        for row in worksheet.iter_rows(values_only=True):
+            print("Read Excel File By Row -:- ", row)
+
+        for row in worksheet.iter_rows():
+            for cell in row:
+                print("Read Excel File By Cell -:- ", cell.value)
 
     ############################################################################
     # Generic Methods for Android devices
