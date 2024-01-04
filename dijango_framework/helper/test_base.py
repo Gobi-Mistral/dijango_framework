@@ -654,6 +654,9 @@ class TestBase(LiveServerTestCase):
         print("Element Position X: ",element_x , "Element Position Y", element_y )
         return element_width, element_height, element_x, element_y
 
+
+
+
     ############################################################################
     # Python Generic Methods
     ############################################################################
@@ -665,6 +668,15 @@ class TestBase(LiveServerTestCase):
             for line in file:
                 print("Read Text File Line By Line -:- ", line.strip())
 
+    def write_text_file(self, file_name, data_to_write):
+        file_name = "D:/work-space/digi-development/dijango_framework/text.txt"
+        data_to_write = "Hello, this is a test line.\nAnother line for testing."
+
+        with open(file_name, "w") as file:
+            file.write(data_to_write)
+
+        print("Data has been written to", file_name)
+
     def read_csv_file(self, file_name):
         file_name = "D:/work-space/digi-development/dijango_framework/test_log.csv"
 
@@ -673,6 +685,21 @@ class TestBase(LiveServerTestCase):
 
             for row in csv_reader:
                 print("Read CSV File Row By Row -:- ", row)
+
+    def write_csv_file(self, file_name, data_to_write):
+        file_name = "D:/work-space/digi-development/dijango_framework/test_log.csv"
+        data_to_write = [
+            ["Name", "Age", "City"],
+            ["John Doe", 25, "New York"],
+            ["Jane Smith", 30, "San Francisco"],
+            ["Bob Johnson", 22, "Los Angeles"]
+        ]
+
+        with open(file_name, "w", newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerows(data_to_write)
+
+        print("Data has been written to", file_name)
 
     def read_excel_file(self, file_name):
         file_name = "D:/work-space/digi-development/dijango_framework/Test_Report.xlsx"
@@ -686,6 +713,25 @@ class TestBase(LiveServerTestCase):
         for row in worksheet.iter_rows():
             for cell in row:
                 print("Read Excel File By Cell -:- ", cell.value)
+
+    def write_excel_file(self, file_name, data_to_write):
+        file_name = "D:/work-space/digi-development/dijango_framework/Test_Report.xlsx"
+        data_to_write = [
+            ["Name", "Age", "City"],
+            ["John Doe", 25, "New York"],
+            ["Jane Smith", 30, "San Francisco"],
+            ["Bob Johnson", 22, "Los Angeles"]
+        ]
+
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.active
+
+        for row_data in data_to_write:
+            worksheet.append(row_data)
+
+        workbook.save(file_name)
+
+        print("Data has been written to", file_name)
 
     ############################################################################
     # Generic Methods for Android devices
