@@ -199,6 +199,25 @@ class TestBase(LiveServerTestCase):
             self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
             Select(element).select_by_visible_text(text)
 
+    def deselect_dropdown_by_index(self, *data: tuple):
+        for element, index in self._loop_through_selector_data_pair(*data):
+            self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
+            Select(element).deselect_by_index(index)
+
+    def deselect_dropdown_by_value(self, *data: tuple):
+        for element, value in self._loop_through_selector_data_pair(*data):
+            self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
+            Select(element).deselect_by_value(value)
+
+    def deselect_dropdown_by_visible_text(self, *data: tuple):
+        for element, text in self._loop_through_selector_data_pair(*data):
+            self.assertEqual(element.tag_name.lower(), 'select', 'Element is not a select box')
+            Select(element).deselect_by_visible_text(text)
+
+    def deselect_all(self, by: str, selector: str):
+        element = self.driver.find_element(by, selector)
+        Select(element).deselect_all()
+
     def click_element(self, by: str, element: str):
         self.driver.find_element(by, element).click()
 
@@ -470,12 +489,14 @@ class TestBase(LiveServerTestCase):
     def scroll_down_web_page(self):
         self.driver.execute_script("window.scrollTo(0, 150)")
 
-    def highlight_the_element(self, element: str):
+    def highlight_the_element(self, by: str, locator: str):
         highlight_script = "var element = arguments[0]; element.style.border = '2px solid red'; element.style.backgroundColor = 'yellow';"
+        element = self.driver.find_element(by, locator)
         self.driver.execute_script(highlight_script, element)
 
-    def reset_the_highlighted_element(self, element: str):
+    def reset_the_highlighted_element(self, by: str, locator: str):
         reset_highlight_script = "var element = arguments[0]; element.style.border = ''; element.style.backgroundColor = '';"
+        element = self.driver.find_element(by, locator)
         self.driver.execute_script(reset_highlight_script, element)
 
     def navigate_back(self):
@@ -604,6 +625,34 @@ class TestBase(LiveServerTestCase):
     def get_title(self):
         actual_title = self.driver.title
         return actual_title
+
+    def right_click(self, by:str, element: str):
+        find_element = self.driver.find_element(by, element)
+        actions = ActionChains(self.driver)
+        actions.context_click(find_element).perform()
+
+    def get_element_size(self, by:str, element: str):
+        find_element = self.driver.find_element(by, element)
+        element_size = find_element.size
+        print("Element Size: ", element_size)
+        return element_size
+
+    def get_element_tag_name(self, by:str, element: str):
+        find_element = self.driver.find_element(by, element)
+        tag_name = find_element.tag_name
+        print("Element Tag Name: ", tag_name)
+        return tag_name
+
+    def get_element_positions(self, by:str, element: str):
+        find_element = self.driver.find_element(by, element)
+        element_positions = find_element.rect
+        element_width = element_positions['width']
+        element_height = element_positions['height']
+        element_x = element_positions['x']
+        element_y = element_positions['y']
+        print("Element Width: ",element_width , "Element Height: ", element_height)
+        print("Element Position X: ",element_x , "Element Position Y", element_y )
+        return element_width, element_height, element_x, element_y
 
     ############################################################################
     # Python Generic Methods
